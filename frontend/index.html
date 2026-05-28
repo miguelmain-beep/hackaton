@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | moviliDATA</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+    <aside class="sidebar">
+        <h2>🚗 moviliDATA</h2>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active">📊 Dashboard Central</a></li>
+            <li><a href="#">⚠️ Zonas Críticas</a></li>
+            <li><a href="#">📈 Predicción</a></li>
+            <li><a href="#">🌧️ Rutas Seguras</a></li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <h1>Monitoreo en Tiempo Real</h1>
+            <p style="color: var(--text-secondary)">Vista general del estado del tráfico en Medellín</p>
+        </header>
+
+        <section class="dashboard-grid">
+            <!-- KPIS -->
+            <div class="card">
+                <h3>Velocidad Promedio Global</h3>
+                <div class="stat-value" id="kpi-velocidad">-- km/h</div>
+                <div class="stat-label">Última actualización: hace 1 min</div>
+            </div>
+            <div class="card">
+                <h3>Zonas en Alerta</h3>
+                <div class="stat-value" id="kpi-alertas" style="color: var(--danger)">--</div>
+                <div class="stat-label">Alta congestión o riesgo</div>
+            </div>
+        </section>
+
+        <section class="dashboard-grid">
+            <!-- Mapa -->
+            <div class="card" style="grid-column: span 2;">
+                <h3>Mapa de Tráfico (Tiempo Real)</h3>
+                <div id="map" class="map-container"></div>
+            </div>
+        </section>
+
+        <section class="dashboard-grid">
+            <!-- Gráfica -->
+            <div class="card">
+                <h3>Congestión por Zona</h3>
+                <canvas id="trafficChart" height="200"></canvas>
+            </div>
+            
+            <!-- Tabla -->
+            <div class="card">
+                <h3>Reporte Detallado</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Zona</th>
+                            <th>Velocidad</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="traffic-table-body">
+                        <!-- Llenado por JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
