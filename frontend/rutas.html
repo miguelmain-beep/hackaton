@@ -5,17 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rutas Seguras | moviliDATA</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+
     <aside class="sidebar">
         <h2>🚗 moviliDATA</h2>
         <ul class="nav-links">
-           <li><a href="index.html">📊 Dashboard Central</a></li>
+            <li><a href="index.html">📊 Dashboard Central</a></li>
             <li><a href="zonas_criticas.html">⚠️ Zonas Críticas</a></li>
-            <li><a href="prediccion.html" class="active">📈 Predicción</a></li>
-            <li><a href="rutas.html">🌧️ Rutas Seguras</a></li>
+            <li><a href="prediccion.html">📈 Predicción</a></li>
+            <li><a href="rutas.html" class="active">🌧️ Rutas Seguras</a></li>
         </ul>
-    </aside> <main class="main-content">
+    </aside> 
+
+    <main class="main-content">
         <header>
             <h1>Rutas Seguras en Temporada de Lluvias</h1>
             <p style="color: var(--text-secondary)">Evita zonas de inundación y accidentalidad (Módulo 4)</p>
@@ -23,23 +27,95 @@
         
         <section class="dashboard-grid">
             <div class="card" style="grid-column: span 2;">
-                <h3>Consulta de Rutas (Conectado a la API)</h3>
-                <pre id="api-result" style="background: #0f172a; padding: 1rem; border-radius: 0.5rem; color: #3b82f6;">Cargando rutas...</pre>
+                <div class="route-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3>🗺️ Alternativas Seguras Disponibles</h3>
+                    <span class="badge-clima" id="clima-actual" style="background-color: #eff6ff; color: #1d4ed8; padding: 0.4rem 0.8rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; border: 1px solid #bfdbfe;">Detectando clima...</span>
+                </div>
+                <div id="rutas-container" class="rutas-lista" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <p style="color: var(--text-secondary)">Cargando rutas recomendadas desde la API...</p>
+                </div>
+            </div>
+
+            <div class="card alert-card">
+                <h3 style="color: #ef4444;">🚫 Vías Críticas a Evitar</h3>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                    Reporte de inundación o alta accidentalidad por lluvias:
+                </p>
+                <ul id="vias-evitar-list" class="vias-bloqueadas" style="list-style: none; padding: 0; margin: 0;">
+                    </ul>
             </div>
         </section>
     </main>
 
     <script type="module">
-        import { api } from './js/api.js';
-        
         document.addEventListener('DOMContentLoaded', async () => {
-            // Simulamos la llamada a la ruta del backend: /api/rutas/seguras
+            // Apuntamos a tu IP local de Uvicorn
+            const URL_API = 'http://127.0.0.1:8000/api/rutas/seguras';
+            
             try {
-                const response = await fetch('http://localhost:8000/api/rutas/seguras');
-                const result = await response.json();
-                document.getElementById('api-result').textContent = JSON.stringify(result, null, 2);
+                const response = await fetch(URL_API);
+                if (!response.ok) throw new Error(`Error en el servidor: ${response.status}`);
+                
+                const data = await response.json();
+
+                // 1. Validar e inyectar el Clima Actual
+                const climaElement = document.getElementById('clima-actual');
+                if (climaElement) {
+                    climaElement.textContent = `🌧️ ${data.clima_actual}`;
+                }
+
+                // 2. Validar e inyectar las Rutas Recomendadas (Mapeado exacto al Python)
+                const rutasContainer = document.getElementById('rutas-container');
+                if (rutasContainer) {
+                    rutasContainer.innerHTML = ''; // Limpiar el mensaje de carga
+
+                    // CORREGIDO: Usamos 'rutas_recomendadas' igual a como viene de tu API
+                    data.rutas_recomendadas.forEach(ruta => {
+                        const rutaCard = document.createElement('div');
+                        rutaCard.className = 'ruta-item-card';
+                        
+                        // Estilos en línea preventivos por si no se han agregado a style.css
+                        rutaCard.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: #f8fafc; border-left: 5px solid #10b981; border-radius: 0.375rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);";
+                        
+                        rutaCard.innerHTML = `
+                            <div class="ruta-info">
+                                <h4 style="margin: 0 0 0.25rem 0; color: #1e293b; font-size: 1.1rem;">${ruta.via}</h4>
+                                <p style="margin: 0; font-size: 0.875rem; color: #64748b;">💡 ${ruta.motivo}</p>
+                            </div>
+                            <div class="ruta-tiempo">
+                                <span style="font-weight: 700; color: #0f172a; background: #e2e8f0; padding: 0.5rem 0.75rem; border-radius: 0.25rem; font-size: 0.9rem; display: inline-block; white-space: nowrap;">⏱️ ${ruta.tiempo_estimado_min} min</span>
+                            </div>
+                        `;
+                        rutasContainer.appendChild(rutaCard);
+                    });
+                }
+
+                // 3. Validar e inyectar las Vías a Evitar
+                const viasEvitarList = document.getElementById('vias-evitar-list');
+                if (viasEvitarList) {
+                    viasEvitarList.innerHTML = '';
+
+                    data.vias_evitar.forEach(via => {
+                        const li = document.createElement('li');
+                        li.style.cssText = "padding: 0.75rem; background: #fef2f2; color: #991b1b; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.9rem; border-left: 4px solid #ef4444;";
+                        li.innerHTML = `❌ <strong>${via}</strong> (Riesgo de inundación)`;
+                        viasEvitarList.appendChild(li);
+                    });
+                }
+
             } catch (error) {
-                document.getElementById('api-result').textContent = "Error al conectar con la API.";
+                console.error("Error al sincronizar módulo de rutas:", error);
+                
+                // Manejo de errores seguro para la UI
+                const rutasContainer = document.getElementById('rutas-container');
+                if (rutasContainer) {
+                    rutasContainer.innerHTML = `
+                        <p style="color: #ef4444; padding: 1rem; background: #fef2f2; border-radius: 0.375rem; font-weight: 500;">
+                            ⚠️ Fallo en la comunicación con la API. Asegúrate de ejecutar: <br>
+                            <code style="background: #fee2e2; padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace;">python -m uvicorn backend.main:app --reload</code>
+                        </p>
+                    `;
+                }
             }
         });
     </script>
