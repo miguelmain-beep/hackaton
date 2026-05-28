@@ -16,11 +16,14 @@ SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{D
 
 try:
     engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    # Forzar una conexión real para detectar si MySQL está disponible
+    with engine.connect() as conn:
+        pass
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    print("✅ Conectado a MySQL exitosamente.")
 except Exception as e:
-    print(f"Error connecting to the database: {e}")
-    # Fallback to sqlite if mysql fails to connect for initial development
-    print("Falling back to SQLite...")
+    print(f"⚠️ No se pudo conectar a MySQL: {e}")
+    print("↪ Usando SQLite como base de datos local de respaldo...")
     SQLALCHEMY_DATABASE_URL = "sqlite:///./hackathon.db"
     engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
