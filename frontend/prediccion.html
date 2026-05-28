@@ -3,44 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rutas Seguras | moviliDATA</title>
+    <title>Predicción de Zonas Críticas | moviliDATA</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <aside class="sidebar">
         <h2>🚗 moviliDATA</h2>
         <ul class="nav-links">
-           <li><a href="index.html">📊 Dashboard Central</a></li>
+            <li><a href="index.html">📊 Dashboard Central</a></li>
             <li><a href="zonas_criticas.html">⚠️ Zonas Críticas</a></li>
             <li><a href="prediccion.html" class="active">📈 Predicción</a></li>
             <li><a href="rutas.html">🌧️ Rutas Seguras</a></li>
         </ul>
+    </aside>
 
     <main class="main-content">
         <header>
-            <h1>Rutas Seguras en Temporada de Lluvias</h1>
-            <p style="color: var(--text-secondary)">Evita zonas de inundación y accidentalidad (Módulo 4)</p>
+            <h1>Predicción de Zonas Críticas</h1>
+            <p style="color: var(--text-secondary)">Consulta las zonas con mayor probabilidad de accidentes según el modelo de IA (Módulo 1)</p>
         </header>
-        
         <section class="dashboard-grid">
             <div class="card" style="grid-column: span 2;">
-                <h3>Consulta de Rutas (Conectado a la API)</h3>
-                <pre id="api-result" style="background: #0f172a; padding: 1rem; border-radius: 0.5rem; color: #3b82f6;">Cargando rutas...</pre>
+                <h3>Predicción (Conectado a la API)</h3>
+                <pre id="api-prediccion" style="background: #0f172a; padding: 1rem; border-radius: 0.5rem; color: #3b82f6;">Cargando predicción...</pre>
             </div>
         </section>
     </main>
 
     <script type="module">
-        import { api } from './js/api.js';
-        
         document.addEventListener('DOMContentLoaded', async () => {
-            // Simulamos la llamada a la ruta del backend: /api/rutas/seguras
             try {
-                const response = await fetch('http://localhost:8000/api/rutas/seguras');
+                const response = await fetch('http://localhost:8000/api/accidentes/prediccion');
                 const result = await response.json();
-                document.getElementById('api-result').textContent = JSON.stringify(result, null, 2);
+                document.getElementById('api-prediccion').textContent = JSON.stringify(result, null, 2);
             } catch (error) {
-                document.getElementById('api-result').textContent = "Error al conectar con la API.";
+                document.getElementById('api-prediccion').textContent = "Error al conectar con la API.";
             }
         });
     </script>
