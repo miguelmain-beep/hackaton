@@ -3,6 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from core.database import engine, Base
 from api import accidentes, trafico, congestion, clima_rutas
 
+# Caché
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
+
 # Crear las tablas en la base de datos
 Base.metadata.create_all(bind=engine)
 
@@ -11,6 +15,11 @@ app = FastAPI(
     description="API REST para la plataforma inteligente de movilidad urbana",
     version="1.0.0"
 )
+
+@app.on_event("startup")
+async def startup():
+    FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache")
+
 
 # Configurar CORS para permitir peticiones desde el Frontend
 app.add_middleware(

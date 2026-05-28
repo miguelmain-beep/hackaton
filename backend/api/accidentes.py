@@ -5,6 +5,9 @@ from models.accidentes import Accidente
 from typing import List
 from pydantic import BaseModel
 from datetime import datetime
+import json
+import os
+from fastapi_cache.decorator import cache
 
 router = APIRouter()
 
@@ -23,21 +26,27 @@ class AccidenteOut(BaseModel):
         orm_mode = True
         from_attributes = True
 
-@router.get("/historico", response_model=List[AccidenteOut])
+@router.get("/historico")
+@cache(expire=60)
 def get_historico_accidentes(db: Session = Depends(get_db)):
     """
     Retorna el histórico de accidentes (útil para el Módulo 1).
+    Usa caché (60s) para evitar sobrecarga y lee desde JSON local si la DB está vacía.
     """
     accidentes = db.query(Accidente).limit(100).all()
-    # Si la base de datos está vacía, devolvemos datos mock
+    # Si la base de datos está vacía, devolvemos datos locales descargados
     if not accidentes:
-        return [
-            AccidenteOut(id=1, fecha=datetime.now(), latitud=6.2442, longitud=-75.5812, gravedad="alta", tipo="choque", zona="Centro", clima="lluvioso"),
-            AccidenteOut(id=2, fecha=datetime.now(), latitud=6.2518, longitud=-75.5636, gravedad="media", tipo="atropello", zona="Aranjuez", clima="despejado")
-        ]
+        data_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "incidentes.json")
+        try:
+            with open(data_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                return data[:100] # Devolver solo 100 para no saturar
+        except FileNotFoundError:
+            return {"error": "No se encontraron datos locales ni en la base de datos."}
     return accidentes
 
 @router.get("/prediccion")
+@cache(expire=60)
 def predict_zonas_criticas():
     """
     Simulación de la predicción de zonas críticas (Módulo 1)
