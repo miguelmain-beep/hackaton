@@ -5,6 +5,7 @@ from models.trafico import FlujoTrafico
 from pydantic import BaseModel
 from typing import List
 from datetime import datetime
+from fastapi_cache.decorator import cache
 
 router = APIRouter()
 
@@ -21,6 +22,7 @@ class FlujoTraficoOut(BaseModel):
         from_attributes = True
 
 @router.get("/tiempo-real", response_model=List[FlujoTraficoOut])
+@cache(expire=60)
 def get_trafico_tiempo_real(db: Session = Depends(get_db)):
     """
     Simula la obtención de tráfico en tiempo real (Módulo 2).
