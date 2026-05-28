@@ -7,3 +7,4 @@ scikit-learn
 python-dotenv
 pydantic
 fastapi-cache2
+jinja2
